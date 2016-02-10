@@ -1,0 +1,23 @@
+----- Enter container
+docker exec -it dockeruniversal_symfony_1 /bin/bash
+docker exec -it dockeruniversal_mysql_1 /bin/bash
+docker exec -it dockeruniversal_nginx_1 /bin/bash
+
+----- Stop all containers and remove them
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+
+or
+
+docker-compose stop && docker-compose rm -f
+
+----- SYMFONY
+
+docker exec -it dockeruniversal_symfony_1 /bin/bash
+
+docker exec -i -t dockeruniversal_symfony_1 bash -c 'cd /var/www/app/ && symfony new symfony'
+
+----- Alpline Linux
+
+docker exec -i -t vhost-proxy -c 'cd /var/nginx && ls'
+

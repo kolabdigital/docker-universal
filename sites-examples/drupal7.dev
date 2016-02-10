@@ -1,0 +1,55 @@
+server {
+    server_name drupal7.dev;
+    root        /var/www/drupal7;
+    index       index.php;
+
+    # client_max_body_size 100M;
+    # fastcgi_read_timeout 1800;
+
+    ## serve imagecache files directly or redirect to drupal if they do not exist.
+    location ~* files/styles {
+        access_log off;
+        expires 30d;
+        try_files $uri @drupal;
+    }
+
+    ## serve imagecache files directly or redirect to drupal if they do not exist.
+    location ~* ^.+.(xsl|xml)$ {
+        access_log off;
+        expires 1d;
+        try_files $uri @drupal;
+    }
+
+    ## Default location
+    location / {
+        try_files $uri $uri/ @drupal;
+        index  index.php;
+    }
+
+    location @drupal {
+        rewrite ^/(.*)$ /index.php?q=$1 last;
+    }
+
+    ## Images and static content is treated different
+    location ~* ^.+.(jpg|jpeg|gif|css|png|js|ico|xml)$ {
+        access_log        off;
+        expires           30d;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+        expires       max;
+        log_not_found off;
+        access_log    off;
+    }
+
+    location ~ \.php$ {
+        try_files     $uri =404;
+        include       fastcgi_params;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass php:9000;
+    }
+
+    error_log /var/log/nginx/d7_error.log;
+    access_log /var/log/nginx/d7_access.log;
+}

@@ -1,0 +1,17 @@
+.DS_Store?
+.project?
+.svn?
+.htaccess
+.htpasswd
+.sass-cache
+.sass-cache*
+*.sublime-workspace
+*.sublime-project
+dbstorage
+/db
+/logs
+/www/*
+!/www/test
+/sites-enabled/*
+!/sites-enabled/default.vhost
+!/sites-enabled/symfony.dev

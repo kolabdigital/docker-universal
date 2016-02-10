@@ -1,0 +1,48 @@
+server {
+    server_name magento.dev;
+    root /var/www/magento;
+
+    location / {
+        index index.php;
+      	if ($request_uri ~* "\.(ico|css|js|gif|jpe?g|png)$") {
+          		access_log off;
+          		expires max;
+      	}
+      	try_files $uri $uri/ @handler;
+    }
+
+  	location /app/                       { deny all; }
+  	location /includes/                  { deny all; }
+  	location /lib/                       { deny all; }
+  	location /media/downloadable/        { deny all; }
+  	location /pkginfo/                   { deny all; }
+  	location /report/config.xml          { deny all; }
+  	location /var/                       { deny all; }
+  	location /lib/minify/ 		           { allow all; }
+
+  	location /var/export/ {
+      	auth_basic              "Restricted";
+      	auth_basic_user_file    htpasswd;
+      	autoindex               on;
+  	}
+
+  	location @handler {
+        rewrite ^(.*) /index.php?$1 last;
+    }
+
+  	fastcgi_intercept_errors on;
+
+  	location ~ \.php$ {
+    		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+
+        include fastcgi_params;
+    		fastcgi_param   SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+        fastcgi_param   SCRIPT_NAME        $fastcgi_script_name;
+
+        fastcgi_index index.php;
+        fastcgi_pass php:9000;
+  	}
+
+    error_log /var/log/nginx/magento_error.log;
+    access_log /var/log/nginx/magento_access.log;
+}

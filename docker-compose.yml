@@ -1,0 +1,51 @@
+mysql:
+    build: mysql
+    ports:
+        - "3306:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./dbstorage:/var/lib/mysql # Prevent from data loose when destroying container
+      - ./db:/var/db # Used to import databases from command line
+
+php:
+    build: php-fpm
+    ports:
+        - 9000:9000
+    links:
+        - mysql:mysql
+    volumes:
+        - ./www:/var/www
+
+symfony:
+    build: php-fpm
+    ports:
+        - 9001:9000
+    links:
+        - mysql:mysql
+    volumes:
+        - ./www/symfony:/var/www/symfony
+
+nginx:
+    build: nginx
+    ports:
+        - 80:80
+    links:
+        - php
+        - symfony
+    volumes_from:
+        - symfony # If you want to run symfony app you need to mount volumes this way otherwise tehre are some problems with serving assets
+    volumes:
+        - ./www:/var/www
+        - ./sites-enabled:/etc/nginx/sites-enabled
+        - ./logs/nginx/:/var/log/nginx
+
+phpmyadmin:
+    image: corbinu/docker-phpmyadmin
+    links:
+        - mysql:mysql
+    ports:
+        - 8181:80
+    environment:
+        MYSQL_USERNAME: root
+        MYSQL_ROOT_PASSWORD: password
